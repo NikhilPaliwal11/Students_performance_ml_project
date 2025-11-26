@@ -6,7 +6,9 @@ import pandas as pd
 from dataclasses import dataclass
 from sklearn.model_selection import train_test_split
 from src.components.data_transformation import DataTransformation
-from src.components.data_transformation import DataTranformationConfig
+from src.components.data_transformation import DataTransformationConfig
+from src.components.model_trainer import ModelTrainer
+from src.components.model_trainer import ModelTrainerConfig
 
 # All the inputs required for DataIngestion component
 @dataclass
@@ -50,4 +52,8 @@ if __name__ == "__main__":
     train_data , test_data = obj.initiate_data_ingestion()
 
     data_transformation = DataTransformation()
-    data_transformation.initiate_data_transformation(train_data,test_data)
+    train_arr,test_arr,_ = data_transformation.initiate_data_transformation(train_data,test_data)
+    # last one we don't require because we have already created the pickle file.
+
+    modeltrainer = ModelTrainer()
+    print(modeltrainer.initiate_model_trainer(train_arr,test_arr))

@@ -16,14 +16,14 @@ from src.utils import save_object
 
 
 @dataclass
-class DataTranformationConfig:
+class DataTransformationConfig:
     preprocessor_obj_file_path = os.path.join('artifacts',"preprocessor.pkl")
 
 class DataTransformation:
     def __init__(self):
-        self.data_transformation_config = DataTranformationConfig()           #Initalizing
+        self.data_transformation_config = DataTransformationConfig()           #Initializing
      
-     # this function is used to create a pickle file which is responsible for converting categorical into numerical and to perform statndard scaler
+    # this function is used to create a pickle file which is responsible for converting categorical into numerical and to perform statndard scaler
     def get_data_transformer_object(self):
         '''This function is responsible for data transformation
         '''
@@ -34,11 +34,11 @@ class DataTransformation:
             # Create a pipeline and we need to handle missing values too
 
             num_pipeline = Pipeline(
-            steps = [("imputer",SimpleImputer(strategy="median")),
-                     ("scaler",StandardScaler())]
+                steps = [("imputer",SimpleImputer(strategy="median")),
+                        ("scaler",StandardScaler())])
             # We handling missing value and use median because there are outlier in data.
             # We do standard scaler for numerical variables.
-            )
+            
 
             # Categorical pipleine handling Simple Imputer for missing values , one hot encoder for encoding because of less categories in each variable.
             # Standardscaler for converting it standard normal varibale between 0 and 1
@@ -49,9 +49,10 @@ class DataTransformation:
                     ("scaler",StandardScaler(with_mean=False))
                 ]
             )
-            #Dont subtract ny mean Just scale by standard deviation and keep zeros as zeors because sparse matrix contains [0,0,0,1,0] one hot encoding
+            # Dont subtract by mean. Just scale by standard deviation and keep zeros as zeors because sparse matrix contains [0,0,0,1,0] one hot encoding
             # if mean 0.05 all zero would become non - zeros , your sparse matrix become dense huge memory problem.
             # Scikit-learn prevented your sparse data from getting converted into a massive dense matrix and eating your memory.
+            
             logging.info(f"Categorical columns:{categorical_columns}")
             logging.info(f"Numerical columns:{numerical_columns}")
         
@@ -65,7 +66,7 @@ class DataTransformation:
             )
 
             return preprocessor
-
+        # Whatever we put after return is what gets sent back to whoever calls this function.
         except Exception as e:
             raise CustomException(e,sys)
         
@@ -82,10 +83,16 @@ class DataTransformation:
             logging.info("Obtaining preprocessor object")
 
             # You are calling one method of a class from another method of the same class.
-            preprocessor_obj = self.get_data_transformer_object()
+            # the object that contains your entire data preprocessing logic.
 
+            preprocessor_obj = self.get_data_transformer_object()
+            # Python is basically doing this:  preprocessor_obj = preprocessor
+            # preprocessor_obj now holds only the ColumnTransformer object you created
+            # Nothing else gets included because you didn’t return anything else.
+            
             target_column_name = "math_score"
             numerical_columns = ["writing_score","reading_score"]
+            categorical_columns = ["gender","race_ethnicity","parental_level_of_education","lunch","test_preparation_course"]
 
             input_feature_train_df = train_df.drop(columns = [target_column_name],axis = 1)
             target_feature_train_df = train_df[target_column_name]
@@ -100,6 +107,11 @@ class DataTransformation:
             # Applying the preprocessing on tain and test     
             input_feature_train_arr = preprocessor_obj.fit_transform(input_feature_train_df)
             input_feature_test_arr = preprocessor_obj.transform(input_feature_test_df)
+            '''The preprocessor learns:
+               Median values for missing numbers
+               Most frequent category values
+               All categories for OneHotEncoder
+               Scaling parameters (mean & std)'''
 
             #np.c_ means:Colum -wisr concatenation (join array side by side) X(features)  y(target)   after np.c_  [X(features),y(target)]
             #model now gets inputs + target combined in one array.
@@ -115,8 +127,31 @@ class DataTransformation:
 
             save_object(
                 file_path = self.data_transformation_config.preprocessor_obj_file_path,
-                obj = preprocessor_obj
-            )
+                obj = preprocessor_obj)
+            # obj = Your trained ColumnTransformer -- obj is your ColumnTransformer object
+            # obj is your trained preprocessing pipeline (ColumnTransformer), and you are saving it into preprocessor.pkl 
+            # so that you can reuse it during prediction or deployment.
+            # Because you called: preprocessor_obj.fit_transform(input_feature_train_df)
+            '''Your preprocessor_obj now contains learned values, like:
+            Median values for missing numericals
+            Most frequent values for categorical imputation
+            Encoded category mappings
+            Mean & standard deviation for scalers
+            So you’re saving:
+            ✅ The full fitted preprocessing pipeline
+            ✅ Along with everything it learned from training data'''
+            '''Yes — even after you called it and assigned the output to input_feature_train_arr, the preprocessor is still “trained”. Let me explain why.
+
+            1. What happens when you call fit_transform()
+            input_feature_train_arr = preprocessor_obj.fit_transform(input_feature_train_df)
+            .fit_transform() does two things internally:
+            fit → Learns parameters from the training data
+                 Median values for SimpleImpute
+                Most frequent categories for categorical columns
+                Category mappings for OneHotEncoder
+                Mean & std for StandardScaler
+            transform → Applies those learned parameters to convert your data into a numerical array
+            The returned value is stored in input_feature_train_arr, which is just the transformed array.'''
 
             return (
                 train_arr,
