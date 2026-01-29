@@ -1,3 +1,6 @@
-## End to End machine learning project
-# This project understands how the student's performance (test score) is affected by other variables such as Gender, Ethnicity, Parental level of education, Lunch and Test preparation course.
-# Model deployment through Flask.
+## End-to-End Machine Learning Project
+
+This project aims to analyze how students' academic performance (test scores) is influenced by various factors such as gender, ethnicity, parental level of education, lunch type, and participation in test preparation courses.
+
+The machine learning model is developed and deployed using Flask.
+
