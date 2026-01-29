@@ -30,7 +30,8 @@ class DataIngestion:
             logging.info('Read the dataset as dataframe')
 
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok = True)
-
+            # By using os.path.dirname we take the folder name and check if it exists and if it does not exists we make a new folder using os.makedir
+            
             df.to_csv(self.ingestion_config.raw_data_path,index = False , header= True)
             
             logging.info("Train test split initiated")
@@ -43,6 +44,7 @@ class DataIngestion:
             return(
                 self.ingestion_config.train_data_path,self.ingestion_config.test_data_path
             )
+        
             # We return train and test data which can be used in data transformation
         except Exception as e:
             raise CustomException(e,sys)

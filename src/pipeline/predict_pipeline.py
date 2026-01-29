@@ -25,7 +25,7 @@ class PredictPipeline:
             raise CustomException(e,sys)
 
 
-## Custom data class will be responsible in mapping all the inputs that we given in html to the backend 
+## Custom data class will be responsible in mapping all the inputs that we give in html to the backend 
 class CustomData:
     def __init__(  self,
         gender: str,
@@ -50,7 +50,7 @@ class CustomData:
 
         self.writing_score = writing_score
 
-    # This function will return all the input in the form of frame 
+    # This function will return all the input in the form of data frame. 
     def get_data_as_data_frame(self):
         try:
             custom_data_input_dict = {

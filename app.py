@@ -21,7 +21,7 @@ def index():
 def predict_datapoint():
     if request.method == 'GET':
         return render_template('home.html')   # data fields where user will enter data
-    else:
+    else:  # POST .. Where user will select different values and using this we get the input from user and try to predict the output.
         data = CustomData(
             gender = request.form.get('gender'),
             race_ethnicity= request.form.get('race_ethnicity'),
@@ -43,3 +43,11 @@ def predict_datapoint():
 
 if __name__ == "__main__":
     app.run(host= "0.0.0.0",debug = True)
+
+'''
+Render template: It connects your backend logic with your frontend page.
+Load home.html and replace {{ results }} with the value of prediction.
+What does host mean?
+The host defines which network address your Flask app will listen on.
+It tells Flask: “From where should people be able to access my app?”
+'''
